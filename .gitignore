@@ -127,3 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.idea/
+Read Quality Control/Choose the best/
+Read Quality Control/GC-content/
+Read Quality Control/Re-peat-peat-peat-peat-peat-peat/
+Read Quality Control/Size does matter/
+Read Quality Control/The FASTQ format/
+Read Quality Control/The unknown/
+Read Quality Control/lesson-info.yaml
+course-info.yaml
+course-remote-info.yaml
