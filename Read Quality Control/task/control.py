@@ -1,12 +1,16 @@
 # FASTQ_FILE_NAME = "example.fastq"
+# FASTQ_FILE_NAME = "SRR16506265_1.fastq"
 
 MSG_READS = "Reads in the file ="
 MSG_LENGTH = "\twith length"
 MSG_AVERAGE = "Reads sequence average length ="
+MSG_REPEATS = "Repeats ="
 MSG_GC_CONTENT = "GC content average ="
 
 readings = dict()
+reads_repeats = dict()
 sum_avg_gc_content = 0
+repeats = 0
 FASTQ_FILE_NAME = input()
 file = open(FASTQ_FILE_NAME, 'rt')
 lines = file.readlines()
@@ -17,6 +21,12 @@ for line in lines[1::4]:
         readings[k] = 1
     else:
         readings[k] += 1
+    if reading not in reads_repeats:
+        reads_repeats[reading] = 0
+    else:
+        reads_repeats[reading] += 1
+        repeats += 1
+
     gc_content = 0
     for n in line:
         if n in {'G', 'C'}:
@@ -42,4 +52,5 @@ avg_gc_content = round(sum_avg_gc_content / reads * 100, 2)
 
 print(f'{MSG_READS} {reads}')
 print(f'{MSG_AVERAGE} {avg_read_len}')
+print(f'\n{MSG_REPEATS} {repeats}')
 print(f'\n{MSG_GC_CONTENT} {avg_gc_content}%')
