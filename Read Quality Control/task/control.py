@@ -3,9 +3,10 @@
 MSG_READS = "Reads in the file ="
 MSG_LENGTH = "\twith length"
 MSG_AVERAGE = "Reads sequence average length ="
+MSG_GC_CONTENT = "GC content average ="
 
 readings = dict()
-
+sum_avg_gc_content = 0
 FASTQ_FILE_NAME = input()
 file = open(FASTQ_FILE_NAME, 'rt')
 lines = file.readlines()
@@ -16,18 +17,29 @@ for line in lines[1::4]:
         readings[k] = 1
     else:
         readings[k] += 1
+    gc_content = 0
+    for n in line:
+        if n in {'G', 'C'}:
+            gc_content += 1
+    sum_avg_gc_content += gc_content / k
+
 file.close()
 
-readings_occurrences = 0
-total_sum = 0
+reads = 0
+sum_reads = 0
 for k, v in readings.items():
-    readings_occurrences += v
-    total_sum += k * v
+    reads += v
+    sum_reads += k * v
 
-average_len = round(total_sum / readings_occurrences)
+avg_read_len = round(sum_reads / reads)
+avg_gc_content = round(sum_avg_gc_content / reads * 100, 2)
 
-print(f'{MSG_READS} {readings_occurrences}:')
-for k in sorted(readings.keys()):
-    print(f'{MSG_LENGTH} {k} = {readings[k]}')
 
-print(f'{MSG_AVERAGE} {average_len}')
+# print(f'{MSG_READS} {reads}:')
+# for k in sorted(readings.keys()):
+#     print(f'{MSG_LENGTH} {k} = {readings[k]}')
+#
+
+print(f'{MSG_READS} {reads}')
+print(f'{MSG_AVERAGE} {avg_read_len}')
+print(f'\n{MSG_GC_CONTENT} {avg_gc_content}%')
