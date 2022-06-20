@@ -6,10 +6,14 @@ MSG_LENGTH = "\twith length"
 MSG_AVERAGE = "Reads sequence average length ="
 MSG_REPEATS = "Repeats ="
 MSG_GC_CONTENT = "GC content average ="
+MSG_NS_READS = "Reads with Ns ="
+MSG_NS = "Ns per read sequence ="
 
 readings = dict()
 reads_repeats = dict()
 sum_avg_gc_content = 0
+sum_avg_ns = 0
+ns_reads = 0
 repeats = 0
 FASTQ_FILE_NAME = input()
 file = open(FASTQ_FILE_NAME, 'rt')
@@ -28,9 +32,16 @@ for line in lines[1::4]:
         repeats += 1
 
     gc_content = 0
+    ns = 0
     for n in line:
         if n in {'G', 'C'}:
             gc_content += 1
+        elif n == "N":
+            ns += 1
+    if ns > 0:
+        ns_reads += 1
+        sum_avg_ns += ns / k
+
     sum_avg_gc_content += gc_content / k
 
 file.close()
@@ -43,7 +54,7 @@ for k, v in readings.items():
 
 avg_read_len = round(sum_reads / reads)
 avg_gc_content = round(sum_avg_gc_content / reads * 100, 2)
-
+avg_ns = round(sum_avg_ns / reads * 100, 2)
 
 # print(f'{MSG_READS} {reads}:')
 # for k in sorted(readings.keys()):
@@ -52,5 +63,9 @@ avg_gc_content = round(sum_avg_gc_content / reads * 100, 2)
 
 print(f'{MSG_READS} {reads}')
 print(f'{MSG_AVERAGE} {avg_read_len}')
+
 print(f'\n{MSG_REPEATS} {repeats}')
+print(f'{MSG_NS_READS} {ns_reads}')
+
 print(f'\n{MSG_GC_CONTENT} {avg_gc_content}%')
+print(f'{MSG_NS} {avg_ns}%')

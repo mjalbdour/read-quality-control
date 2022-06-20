@@ -2,16 +2,16 @@ from hstest import *
 import re
 
 
-class RepeatsChecker(StageTest):
-    @dynamic_test(time_limit=60000)
-    def test(self):
+class NsChecker(StageTest):
+
+    def common_test(self, file_name, AMOUNT, AVERAGE, REPEATS, READSN, GC, NSPER):
         program = TestedProgram()
         program.start()
 
         if not program.is_waiting_input():
             raise WrongAnswer("You program should input the path to the file")
 
-        reply = program.execute("SRR16506265_1.fastq")
+        reply = program.execute(file_name)
 
         # if the reply is empty
         if not reply:
@@ -29,32 +29,45 @@ class RepeatsChecker(StageTest):
 
         # check values
         def check_number(total_reply, substring, correct_number):
+            float_lines = ["gccontentaverage=", "nsperreadsequence="]
             substring_low = substring.replace(" ", "").lower()
-            if substring_low == "gccontentaverage=":
-                number_search = re.search(pattern="gccontentaverage=([0-9]+\.[0-9]+)", string=total_reply)
-            else:
-                number_search = re.search(pattern=f"{substring_low}([0-9]+)", string=total_reply)
+            pattern = f"{substring_low}([0-9]+)"
+
+            if substring_low in float_lines:
+                pattern = pattern[:-1] + "\.[0-9]+)"
+            number_search = re.search(pattern=pattern, string=total_reply)
 
             if number_search is None:
                 raise WrongAnswer(f"Didn't find numerical answer in the \"{substring}\" line. Please, check if the answer format is correct")
-
             number = float(number_search.group(1))
             if number != correct_number:
                 raise WrongAnswer(f"The value of \"{substring}\" is incorrect")
 
-        # list of points for checking
-        answer_points = ["Reads in the file =", "Reads sequence average length =", "Repeats =", "GC content average ="]
+        # dict of points for checking + correct values
+        answer_points = {"Reads in the file =": AMOUNT,
+                         "Reads sequence average length =": AVERAGE,
+                         "Repeats =": REPEATS,
+                         "GC content average =": GC,
+                         "Reads with Ns =": READSN,
+                         "Ns per read sequence =": NSPER}
 
         # run checking!
-        for point in answer_points:
+        for point in answer_points.keys():
             check_format(reply_low, point)
-        check_number(reply_low, answer_points[0], 1071863)  # reads amount
-        check_number(reply_low, answer_points[1], 75)  # average length
-        check_number(reply_low, answer_points[2], 236842)  # repeats
-        check_number(reply_low, answer_points[3], 51.25)  # GC
-
+        for point, correct_result in answer_points.items():
+            check_number(reply_low, point, correct_result)
         return CheckResult.correct()
 
+    @dynamic_test
+    def test1(self):
+        return self.common_test("test/test1.fastq", AMOUNT=4, AVERAGE=101, REPEATS=0,
+                                READSN=4, GC=38.61, NSPER=20.3)
 
-if __name__ == "__main__":
-    RepeatsChecker().run_tests()
+    @dynamic_test
+    def test2(self):
+        return self.common_test("test/test2.fastq", AMOUNT=4, AVERAGE=133, REPEATS=0,
+                                READSN=1, GC=44.49, NSPER=0.17)
+
+
+if __name__ == '__main__':
+    NsChecker().run_tests()
